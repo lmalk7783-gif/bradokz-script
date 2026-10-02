@@ -64,26 +64,46 @@ local BtnFlashback = CreateSquareButton("فلاش باك")
 local BtnAimbot = CreateSquareButton("أيم بوت")
 local BtnKnife = CreateSquareButton("رمي")
 local BtnKill = CreateSquareButton("قتل")
-local BtnTeleportGun = CreateSquareButton("الانتقال إلى القاعدة")
+local BtnKillAll = CreateSquareButton("قتل الجميع (للمردر)")
 
--- 1. الفلاش باك
+-- 1. الفلاش باك الانسيابي (Rewind)
 local PositionHistory = {}
+local isRewinding = false
+
 RunService.Heartbeat:Connect(function()
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+    if not isRewinding and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         table.insert(PositionHistory, LocalPlayer.Character.HumanoidRootPart.CFrame)
-        if #PositionHistory > 180 then
+        if #PositionHistory > 300 then
             table.remove(PositionHistory, 1)
         end
     end
 end)
 
 BtnFlashback.MouseButton1Click:Connect(function()
-    if #PositionHistory > 0 and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        LocalPlayer.Character.HumanoidRootPart.CFrame = PositionHistory[1]
+    if isRewinding then
+        isRewinding = false
+        BtnFlashback.Text = "فلاش باك"
+    else
+        if #PositionHistory > 0 then
+            isRewinding = true
+            BtnFlashback.Text = "إيقاف الفلاش باك"
+            
+            task.spawn(function()
+                while isRewinding and #PositionHistory > 0 do
+                    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                        local lastCFrame = table.remove(PositionHistory)
+                        LocalPlayer.Character.HumanoidRootPart.CFrame = lastCFrame
+                    end
+                    task.wait(0.01)
+                end
+                isRewinding = false
+                BtnFlashback.Text = "فلاش باك"
+            end)
+        end
     end
 end)
 
--- 2. كشف الأدوار والمسدس
+-- 2. كشف الأدوار
 local function GetRole(player)
     if not player or not player.Character then return "Innocent" end
     if player.Backpack:FindFirstChild("Knife") or player.Character:FindFirstChild("Knife") then
@@ -168,7 +188,7 @@ BtnKnife.MouseButton1Click:Connect(function()
     end
 end)
 
--- 5. القتل
+-- 5. القتل العادي
 BtnKill.MouseButton1Click:Connect(function()
     if LocalPlayer.Character then
         local knife = LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife")
@@ -179,21 +199,17 @@ BtnKill.MouseButton1Click:Connect(function()
     end
 end)
 
--- 6. الانتقال للمسدس
-BtnTeleportGun.MouseButton1Click:Connect(function()
-    local droppedGun = nil
-    for _, obj in pairs(Workspace:GetChildren()) do
-        if obj.Name == "GunDrop" or (obj:IsA("Tool") and obj.Name == "Gun") then
-            droppedGun = obj
-            break
-        end
-    end
-    
-    if droppedGun and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        if droppedGun:IsA("BasePart") then
-            LocalPlayer.Character.HumanoidRootPart.CFrame = droppedGun.CFrame
-        elseif droppedGun:FindFirstChild("Handle") then
-            LocalPlayer.Character.HumanoidRootPart.CFrame = droppedGun.Handle.CFrame
+-- 6. قتل الجميع (لما تكون مردر)
+BtnKillAll.MouseButton1Click:Connect(function()
+    local knife = LocalPlayer.Character and (LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife"))
+    if knife then
+        knife.Parent = LocalPlayer.Character
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 1)
+                task.wait(0.1)
+                knife:Activate()
+            end
         end
     end
 end)
