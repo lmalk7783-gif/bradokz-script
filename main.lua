@@ -1,168 +1,163 @@
--- bradokz Hub - Ultra Light & Fast Version
--- Works 100% on Delta Mobile Executor
+-- [[ bradokz Hub - V2 Ultimate ]] --
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local ScreenGui = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
-local TitleLabel = Instance.new("TextLabel")
-local DesyncBtn = Instance.new("TextButton")
-local StealGuiBtn = Instance.new("TextButton")
-local BaseGuiBtn = Instance.new("TextButton")
-local InfJumpBtn = Instance.new("TextButton")
-local LagBtn = Instance.new("TextButton")
-local CloseBtn = Instance.new("TextButton")
+local Window = Rayfield:CreateWindow({
+   Name = "bradokz Hub ⚡",
+   LoadingTitle = "جاري تحميل السكربت المطور...",
+   LoadingSubtitle = "by bradokz",
+   ConfigurationSaving = { Enabled = false },
+   KeySystem = false
+})
 
-ScreenGui.Name = "bradokzHubGui"
-ScreenGui.Parent = game:GetService("CoreGui")
-ScreenGui.ResetOnSpawn = false
+local MainTab = Window:CreateTab("المميزات الرئيسية 🚀", 4483362458)
+local CombatTab = Window:CreateTab("القتال والملاحقة ⚔️", 4483362458)
+local PlayerTab = Window:CreateTab("حجم اللاعب 📏", 4483362458)
 
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-MainFrame.BorderSizePixel = 2
-MainFrame.BorderColor3 = Color3.fromRGB(0, 170, 255)
-MainFrame.Position = UDim2.new(0.3, 0, 0.25, 0)
-MainFrame.Size = UDim2.new(0, 260, 0, 320)
-MainFrame.Active = true
-MainFrame.Draggable = true
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local SavedPosition = nil
+local TargetPlayer = nil
+local IsAttacking = false
 
-TitleLabel.Name = "TitleLabel"
-TitleLabel.Parent = MainFrame
-TitleLabel.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-TitleLabel.Size = UDim2.new(1, 0, 0, 40)
-TitleLabel.Font = Enum.Font.SourceSansBold
-TitleLabel.Text = "bradokz Hub"
-TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.TextSize = 20
+-- 1. زر السرقة السريعة بدون مربع (Instant Steal)
+MainTab:CreateButton({
+   Name = "سرقة فورية بدون انتظار (Instant Steal)",
+   Callback = function()
+       for _, prompt in pairs(workspace:GetDescendants()) do
+           if prompt:IsA("ProximityPrompt") then
+               prompt.HoldDuration = 0
+               fireproximityprompt(prompt)
+           end
+       end
+   end,
+})
 
-CloseBtn.Name = "CloseBtn"
-CloseBtn.Parent = TitleLabel
-CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-CloseBtn.Position = UDim2.new(0.85, 0, 0.1, 0)
-CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-CloseBtn.Font = Enum.Font.SourceSansBold
-CloseBtn.Text = "X"
-CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseBtn.TextSize = 18
-CloseBtn.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
-end)
+-- 2. تحسين الـ Desync الخارق (محدش يضربك)
+local DesyncEnabled = false
+MainTab:CreateToggle({
+   Name = "تفعيل Desync متطور (حماية من الضرب)",
+   CurrentValue = false,
+   Flag = "DesyncToggle",
+   Callback = function(Value)
+       DesyncEnabled = Value
+       local char = LocalPlayer.Character
+       if char and char:FindFirstChild("HumanoidRootPart") then
+           if DesyncEnabled then
+               char.HumanoidRootPart.CanCollide = false
+               -- قطع مزامنة الـ Velocity لمنع التتبع
+               RunService.Heartbeat:Connect(function()
+                   if DesyncEnabled and char:FindFirstChild("HumanoidRootPart") then
+                       char.HumanoidRootPart.Velocity = Vector3.new(0, -100, 0)
+                   end
+               end)
+           end
+       end
+   end,
+})
 
-local function createButton(name, text, posY, callback)
-    local btn = Instance.new("TextButton")
-    btn.Name = name
-    btn.Parent = MainFrame
-    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    btn.Position = UDim2.new(0.1, 0, 0, posY)
-    btn.Size = UDim2.new(0.8, 0, 0, 40)
-    btn.Font = Enum.Font.SourceSansBold
-    btn.Text = text
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 18
-    btn.MouseButton1Click:Connect(callback)
-    return btn
+-- 3. نظام ملاحقة وضرب اللاعبين + العودة عند ترك العصا
+local PlayerList = {}
+for _, p in pairs(Players:GetPlayers()) do
+    if p ~= LocalPlayer then table.insert(PlayerList, p.Name) end
 end
 
--- 1. Desync
-local desyncActive = false
-local desyncBtnObj
-desyncBtnObj = createButton("DesyncBtn", "Desync: إيقاف", 50, function()
-    desyncActive = not desyncActive
-    if desyncActive then
-        desyncBtnObj.Text = "Desync: تفعيل"
-        desyncBtnObj.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-    else
-        desyncBtnObj.Text = "Desync: إيقاف"
-        desyncBtnObj.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    end
-end)
+CombatTab:CreateDropdown({
+   Name = "اختر اللاعب للاستهداف",
+   Options = PlayerList,
+   CurrentOption = "",
+   Flag = "TargetDropdown",
+   Callback = function(Option)
+       TargetPlayer = Players:FindFirstChild(Option[1])
+   end,
+})
 
-game:GetService("RunService").Heartbeat:Connect(function()
-    local lp = game:GetService("Players").LocalPlayer
-    if desyncActive and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-        local hrp = lp.Character.HumanoidRootPart
-        local oldVel = hrp.Velocity
-        hrp.Velocity = Vector3.new(9999, 9999, 9999)
-        game:GetService("RunService").RenderStepped:Wait()
-        hrp.Velocity = oldVel
-    end
-end)
+CombatTab:CreateToggle({
+   Name = "تفعيل الملاحقة والضرب الآلي",
+   CurrentValue = false,
+   Flag = "AutoAttack",
+   Callback = function(Value)
+       IsAttacking = Value
+       if Value then
+           SavedPosition = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character.HumanoidRootPart.CFrame
+           
+           task.spawn(function()
+               while IsAttacking do
+                   task.wait()
+                   local char = LocalPlayer.Character
+                   local tool = char and char:FindFirstChildOfClass("Tool")
+                   
+                   -- التحقق من إمساك العصا/السلاح
+                   if tool and TargetPlayer and TargetPlayer.Character and TargetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                       -- الالتصاق باللاعب
+                       char.HumanoidRootPart.CFrame = TargetPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2)
+                       -- الضرب التلقائي
+                       tool:Activate()
+                   elseif not tool and SavedPosition then
+                       -- في حالة ترك العصا: العودة للمكان الأصلي
+                       char.HumanoidRootPart.CFrame = SavedPosition
+                   end
+               end
+           end)
+       else
+           if SavedPosition and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+               LocalPlayer.Character.HumanoidRootPart.CFrame = SavedPosition
+           end
+       end
+   end,
+})
 
--- 2. Steal Button
-createButton("StealBtn", "تفعيل زر السرقة (Steal)", 100, function()
-    local sGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
-    local sBtn = Instance.new("TextButton", sGui)
-    sBtn.Size = UDim2.new(0, 110, 0, 50)
-    sBtn.Position = UDim2.new(0.8, 0, 0.3, 0)
-    sBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    sBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    sBtn.Text = "Steal"
-    sBtn.TextSize = 20
-    sBtn.Draggable = true
-    sBtn.Active = true
-    sBtn.MouseButton1Click:Connect(function()
-        for _, prompt in pairs(workspace:GetDescendants()) do
-            if prompt:IsA("ProximityPrompt") then
-                fireproximityprompt(prompt)
-            end
-        end
-    end)
-end)
+-- 4. التحكم في حجم الشخصية (Size Changer)
+PlayerTab:CreateButton({
+   Name = "تكبير الحجم (Big Size)",
+   Callback = function()
+       local char = LocalPlayer.Character
+       if char and char:FindFirstChild("Humanoid") then
+           local hum = char.Humanoid
+           if hum:FindFirstChild("BodyWidthScale") then
+               hum.BodyWidthScale.Value = 3
+               hum.BodyHeightScale.Value = 3
+               hum.BodyDepthScale.Value = 3
+               hum.HeadScale.Value = 3
+           end
+       end
+   end,
+})
 
--- 3. Base Button
-createButton("BaseBtn", "تفعيل زر العودة (base)", 150, function()
-    local bGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
-    local bBtn = Instance.new("TextButton", bGui)
-    bBtn.Size = UDim2.new(0, 110, 0, 50)
-    bBtn.Position = UDim2.new(0.8, 0, 0.45, 0)
-    bBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    bBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    bBtn.Text = "base"
-    bBtn.TextSize = 20
-    bBtn.Draggable = true
-    bBtn.Active = true
-    
-    local lp = game:GetService("Players").LocalPlayer
-    local savedPos = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") and lp.Character.HumanoidRootPart.CFrame
-    
-    bBtn.MouseButton1Click:Connect(function()
-        if savedPos and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-            lp.Character.HumanoidRootPart.CFrame = savedPos
-        end
-    end)
-end)
+PlayerTab:CreateButton({
+   Name = "تصغير الحجم (Small Size)",
+   Callback = function()
+       local char = LocalPlayer.Character
+       if char and char:FindFirstChild("Humanoid") then
+           local hum = char.Humanoid
+           if hum:FindFirstChild("BodyWidthScale") then
+               hum.BodyWidthScale.Value = 0.4
+               hum.BodyHeightScale.Value = 0.4
+               hum.BodyDepthScale.Value = 0.4
+               hum.HeadScale.Value = 0.4
+           end
+       end
+   end,
+})
 
--- 4. Infinite Jump
-local infJumpActive = false
-local infJumpBtnObj
-infJumpBtnObj = createButton("InfJumpBtn", "القفز اللانهائي: إيقاف", 200, function()
-    infJumpActive = not infJumpActive
-    if infJumpActive then
-        infJumpBtnObj.Text = "القفز اللانهائي: تفعيل"
-        infJumpBtnObj.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-    else
-        infJumpBtnObj.Text = "القفز اللانهائي: إيقاف"
-        infJumpBtnObj.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    end
-end)
+PlayerTab:CreateButton({
+   Name = "إعادة للحجم الطبيعي",
+   Callback = function()
+       local char = LocalPlayer.Character
+       if char and char:FindFirstChild("Humanoid") then
+           local hum = char.Humanoid
+           if hum:FindFirstChild("BodyWidthScale") then
+               hum.BodyWidthScale.Value = 1
+               hum.BodyHeightScale.Value = 1
+               hum.BodyDepthScale.Value = 1
+               hum.HeadScale.Value = 1
+           end
+       end
+   end,
+})
 
-game:GetService("UserInputService").JumpRequest:Connect(function()
-    local lp = game:GetService("Players").LocalPlayer
-    if infJumpActive and lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
-        lp.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-    end
-end)
-
--- 5. Lag Reduction
-createButton("LagBtn", "تخفيف اللاق", 250, function()
-    for _, v in pairs(workspace:GetDescendants()) do
-        if v:IsA("BasePart") then
-            v.Material = Enum.Material.SmoothPlastic
-            v.Reflectance = 0
-        elseif v:IsA("Decal") or v:IsA("Texture") then
-            v:Destroy()
-        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-            v.Enabled = false
-        end
-    end
-    game:GetService("Lighting").GlobalShadows = false
-end)
+Rayfield:Notify({
+   Title = "bradokz Hub",
+   Content = "تم تحميل المميزات الجديدة بنجاح!",
+   Duration = 5,
+})
