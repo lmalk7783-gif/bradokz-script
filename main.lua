@@ -1,240 +1,168 @@
--- bradokz Hub - Custom Script for Brainrot Game
--- Made for Delta Executor
+-- bradokz Hub - Ultra Light & Fast Version
+-- Works 100% on Delta Mobile Executor
 
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/main/Addons/SaveManager.lua"))()
-local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/main/Addons/InterfaceManager.lua"))()
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local TitleLabel = Instance.new("TextLabel")
+local DesyncBtn = Instance.new("TextButton")
+local StealGuiBtn = Instance.new("TextButton")
+local BaseGuiBtn = Instance.new("TextButton")
+local InfJumpBtn = Instance.new("TextButton")
+local LagBtn = Instance.new("TextButton")
+local CloseBtn = Instance.new("TextButton")
 
-local Window = Fluent:CreateWindow({
-    Title = "bradokz Hub",
-    SubTitle = "by bradokz",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(580, 460),
-    Theme = "Dark",
-    MinimizeKey = Enum.KeyCode.LeftControl
-})
+ScreenGui.Name = "bradokzHubGui"
+ScreenGui.Parent = game:GetService("CoreGui")
+ScreenGui.ResetOnSpawn = false
 
-local Tabs = {
-    Main = Window:AddTab({ Title = "الرئيسية", Icon = "home" }),
-    Player = Window:AddTab({ Title = "اللاعب والشخصية", Icon = "user" }),
-    Settings = Window:AddTab({ Title = "الأداء والتخفيف", Icon = "settings" })
-}
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainFrame.BorderSizePixel = 2
+MainFrame.BorderColor3 = Color3.fromRGB(0, 170, 255)
+MainFrame.Position = UDim2.new(0.3, 0, 0.25, 0)
+MainFrame.Size = UDim2.new(0, 260, 0, 320)
+MainFrame.Active = true
+MainFrame.Draggable = true
 
-local Options = Fluent.Options
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local LocalPlayer = Players.LocalPlayer
+TitleLabel.Name = "TitleLabel"
+TitleLabel.Parent = MainFrame
+TitleLabel.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+TitleLabel.Size = UDim2.new(1, 0, 0, 40)
+TitleLabel.Font = Enum.Font.SourceSansBold
+TitleLabel.Text = "bradokz Hub"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextSize = 20
 
----------------------------------------------------------
--- 1. Desync
----------------------------------------------------------
-local DesyncToggle = Tabs.Main:AddToggle("DesyncToggle", {Title = "Desync", Default = false})
-
-getgenv().DesyncActive = false
-DesyncToggle:OnChanged(function()
-    getgenv().DesyncActive = Options.DesyncToggle.Value
+CloseBtn.Name = "CloseBtn"
+CloseBtn.Parent = TitleLabel
+CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+CloseBtn.Position = UDim2.new(0.85, 0, 0.1, 0)
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Font = Enum.Font.SourceSansBold
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.TextSize = 18
+CloseBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
 end)
 
-RunService.Heartbeat:Connect(function()
-    if getgenv().DesyncActive and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local hrp = LocalPlayer.Character.HumanoidRootPart
+local function createButton(name, text, posY, callback)
+    local btn = Instance.new("TextButton")
+    btn.Name = name
+    btn.Parent = MainFrame
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    btn.Position = UDim2.new(0.1, 0, 0, posY)
+    btn.Size = UDim2.new(0.8, 0, 0, 40)
+    btn.Font = Enum.Font.SourceSansBold
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 18
+    btn.MouseButton1Click:Connect(callback)
+    return btn
+end
+
+-- 1. Desync
+local desyncActive = false
+local desyncBtnObj
+desyncBtnObj = createButton("DesyncBtn", "Desync: إيقاف", 50, function()
+    desyncActive = not desyncActive
+    if desyncActive then
+        desyncBtnObj.Text = "Desync: تفعيل"
+        desyncBtnObj.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+    else
+        desyncBtnObj.Text = "Desync: إيقاف"
+        desyncBtnObj.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    end
+end)
+
+game:GetService("RunService").Heartbeat:Connect(function()
+    local lp = game:GetService("Players").LocalPlayer
+    if desyncActive and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+        local hrp = lp.Character.HumanoidRootPart
         local oldVel = hrp.Velocity
         hrp.Velocity = Vector3.new(9999, 9999, 9999)
-        RunService.RenderStepped:Wait()
+        game:GetService("RunService").RenderStepped:Wait()
         hrp.Velocity = oldVel
     end
 end)
 
----------------------------------------------------------
--- 2. Steal Button (زر السرقة الأسود)
----------------------------------------------------------
-local StealGui = Instance.new("ScreenGui")
-local StealBtn = Instance.new("TextButton")
-
-StealGui.Name = "StealGui_bradokz"
-StealGui.Parent = game:GetService("CoreGui")
-
-StealBtn.Name = "StealBtn"
-StealBtn.Parent = StealGui
-StealBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-StealBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-StealBtn.Size = UDim2.new(0, 130, 0, 50)
-StealBtn.Position = UDim2.new(0.8, 0, 0.35, 0)
-StealBtn.Text = "Steal"
-StealBtn.TextSize = 22
-StealBtn.Font = Enum.Font.SourceSansBold
-StealBtn.Visible = false
-StealBtn.Active = true
-StealBtn.Draggable = true
-
-Tabs.Main:AddButton({
-    Title = "السرقة تلقائي",
-    Callback = function()
-        StealBtn.Visible = true
-    end
-})
-
-StealBtn.MouseButton1Click:Connect(function()
-    for _, prompt in pairs(workspace:GetDescendants()) do
-        if prompt:IsA("ProximityPrompt") then
-            fireproximityprompt(prompt)
-        end
-    end
-end)
-
----------------------------------------------------------
--- 3. Base Button (زر العودة للبيت الأسود)
----------------------------------------------------------
-local BaseGui = Instance.new("ScreenGui")
-local BaseBtn = Instance.new("TextButton")
-
-BaseGui.Name = "BaseGui_bradokz"
-BaseGui.Parent = game:GetService("CoreGui")
-
-BaseBtn.Name = "BaseBtn"
-BaseBtn.Parent = BaseGui
-BaseBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-BaseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-BaseBtn.Size = UDim2.new(0, 130, 0, 50)
-BaseBtn.Position = UDim2.new(0.8, 0, 0.48, 0)
-BaseBtn.Text = "base"
-BaseBtn.TextSize = 22
-BaseBtn.Font = Enum.Font.SourceSansBold
-BaseBtn.Visible = false
-BaseBtn.Active = true
-BaseBtn.Draggable = true
-
-Tabs.Main:AddButton({
-    Title = "العودة",
-    Callback = function()
-        BaseBtn.Visible = true
-    end
-})
-
-local SavedBasePos = nil
-if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-    SavedBasePos = LocalPlayer.Character.HumanoidRootPart.CFrame
-end
-
-BaseBtn.MouseButton1Click:Connect(function()
-    if SavedBasePos and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        LocalPlayer.Character.HumanoidRootPart.CFrame = SavedBasePos
-    end
-end)
-
----------------------------------------------------------
--- 4. Target Player & Bat Attack
----------------------------------------------------------
-local playerNames = {}
-for _, p in pairs(Players:GetPlayers()) do
-    if p ~= LocalPlayer then
-        table.insert(playerNames, p.Name)
-    end
-end
-
-local SelectedPlayerName = nil
-local PlayerDropdown = Tabs.Main:AddDropdown("PlayerDropdown", {
-    Title = "اختر الشخص في السيرفر",
-    Values = playerNames,
-    Multi = false,
-    Default = 1,
-})
-
-PlayerDropdown:OnChanged(function(Value)
-    SelectedPlayerName = Value
-end)
-
-Tabs.Main:AddButton({
-    Title = "ضرب الشخص",
-    Callback = function()
-        if SelectedPlayerName then
-            local targetPlayer = Players:FindFirstChild(SelectedPlayerName)
-            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    LocalPlayer.Character.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2)
-                    local bat = LocalPlayer.Character:FindFirstChildOfClass("Tool") or LocalPlayer.Backpack:FindFirstChildOfClass("Tool")
-                    if bat then
-                        bat.Parent = LocalPlayer.Character
-                        bat:Activate()
-                    end
-                end
+-- 2. Steal Button
+createButton("StealBtn", "تفعيل زر السرقة (Steal)", 100, function()
+    local sGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+    local sBtn = Instance.new("TextButton", sGui)
+    sBtn.Size = UDim2.new(0, 110, 0, 50)
+    sBtn.Position = UDim2.new(0.8, 0, 0.3, 0)
+    sBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    sBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    sBtn.Text = "Steal"
+    sBtn.TextSize = 20
+    sBtn.Draggable = true
+    sBtn.Active = true
+    sBtn.MouseButton1Click:Connect(function()
+        for _, prompt in pairs(workspace:GetDescendants()) do
+            if prompt:IsA("ProximityPrompt") then
+                fireproximityprompt(prompt)
             end
         end
-    end
-})
-
----------------------------------------------------------
--- 5. Size Control
----------------------------------------------------------
-Tabs.Player:AddButton({
-    Title = "تكبير الحجم",
-    Callback = function()
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            local hum = LocalPlayer.Character.Humanoid
-            if hum:FindFirstChild("HeadScale") then
-                hum.HeadScale.Value = hum.HeadScale.Value * 1.4
-                hum.BodyDepthScale.Value = hum.BodyDepthScale.Value * 1.4
-                hum.BodyWidthScale.Value = hum.BodyWidthScale.Value * 1.4
-                hum.BodyHeightScale.Value = hum.BodyHeightScale.Value * 1.4
-            end
-        end
-    end
-})
-
-Tabs.Player:AddButton({
-    Title = "تصغير الحجم",
-    Callback = function()
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            local hum = LocalPlayer.Character.Humanoid
-            if hum:FindFirstChild("HeadScale") then
-                hum.HeadScale.Value = hum.HeadScale.Value * 0.7
-                hum.BodyDepthScale.Value = hum.BodyDepthScale.Value * 0.7
-                hum.BodyWidthScale.Value = hum.BodyWidthScale.Value * 0.7
-                hum.BodyHeightScale.Value = hum.BodyHeightScale.Value * 0.7
-            end
-        end
-    end
-})
-
----------------------------------------------------------
--- 6. Infinite Jump Toggle
----------------------------------------------------------
-local InfJumpToggle = Tabs.Player:AddToggle("InfJumpToggle", {Title = "القفز اللانهائي", Default = false})
-
-getgenv().InfJump = false
-InfJumpToggle:OnChanged(function()
-    getgenv().InfJump = Options.InfJumpToggle.Value
+    end)
 end)
 
-UserInputService.JumpRequest:Connect(function()
-    if getgenv().InfJump and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+-- 3. Base Button
+createButton("BaseBtn", "تفعيل زر العودة (base)", 150, function()
+    local bGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+    local bBtn = Instance.new("TextButton", bGui)
+    bBtn.Size = UDim2.new(0, 110, 0, 50)
+    bBtn.Position = UDim2.new(0.8, 0, 0.45, 0)
+    bBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    bBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    bBtn.Text = "base"
+    bBtn.TextSize = 20
+    bBtn.Draggable = true
+    bBtn.Active = true
+    
+    local lp = game:GetService("Players").LocalPlayer
+    local savedPos = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") and lp.Character.HumanoidRootPart.CFrame
+    
+    bBtn.MouseButton1Click:Connect(function()
+        if savedPos and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+            lp.Character.HumanoidRootPart.CFrame = savedPos
+        end
+    end)
+end)
+
+-- 4. Infinite Jump
+local infJumpActive = false
+local infJumpBtnObj
+infJumpBtnObj = createButton("InfJumpBtn", "القفز اللانهائي: إيقاف", 200, function()
+    infJumpActive = not infJumpActive
+    if infJumpActive then
+        infJumpBtnObj.Text = "القفز اللانهائي: تفعيل"
+        infJumpBtnObj.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+    else
+        infJumpBtnObj.Text = "القفز اللانهائي: إيقاف"
+        infJumpBtnObj.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     end
 end)
 
----------------------------------------------------------
--- 7. Lag Reduction
----------------------------------------------------------
-Tabs.Settings:AddButton({
-    Title = "تخفيف اللاق",
-    Callback = function()
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:IsA("BasePart") then
-                v.Material = Enum.Material.SmoothPlastic
-                v.Reflectance = 0
-            elseif v:IsA("Decal") or v:IsA("Texture") then
-                v:Destroy()
-            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                v.Enabled = false
-            end
-        end
-        game:GetService("Lighting").GlobalShadows = false
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    local lp = game:GetService("Players").LocalPlayer
+    if infJumpActive and lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
+        lp.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
     end
-})
+end)
 
-Fluent:Notify({
-    Title = "bradokz Hub",
-    Content = "تم تشغيل السكربت بنجاح!",
-    Duration = 5
-})
+-- 5. Lag Reduction
+createButton("LagBtn", "تخفيف اللاق", 250, function()
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.Material = Enum.Material.SmoothPlastic
+            v.Reflectance = 0
+        elseif v:IsA("Decal") or v:IsA("Texture") then
+            v:Destroy()
+        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+            v.Enabled = false
+        end
+    end
+    game:GetService("Lighting").GlobalShadows = false
+end)
