@@ -17,16 +17,36 @@ if not success or not ScreenGui.Parent then
     ScreenGui.Parent = game:GetService("CoreGui")
 end
 
+-- زر إخفاء/إظهار الواجهة (⚡)
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Name = "ToggleUI"
+ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
+ToggleBtn.Position = UDim2.new(0.01, 0, 0.2, 0)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.Text = "⚡"
+ToggleBtn.TextSize = 24
+ToggleBtn.BorderSizePixel = 2
+ToggleBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.Active = true
+ToggleBtn.Draggable = true
+ToggleBtn.Parent = ScreenGui
+
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "bradokzMain"
-MainFrame.Size = UDim2.new(0, 210, 0, 390)
-MainFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
+MainFrame.Size = UDim2.new(0, 210, 0, 310)
+MainFrame.Position = UDim2.new(0.06, 0, 0.2, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.BorderSizePixel = 2
 MainFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
+
+-- إخفاء/إظهار عند الضغط على ⚡
+ToggleBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
 
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 35)
@@ -61,12 +81,9 @@ end
 
 -- الأزرار
 local BtnFlashback = CreateSquareButton("فلاش باك")
-local BtnAimbot = CreateSquareButton("أيم بوت")
-local BtnKnife = CreateSquareButton("رمي")
-local BtnKill = CreateSquareButton("قتل")
+local BtnAimbot = CreateSquareButton("Aimbot")
+local BtnKnife = CreateSquareButton("قتل")
 local BtnKillAll = CreateSquareButton("قتل الجميع (للمردر)")
-local BtnBigSize = CreateSquareButton("تكبير الحجم ➕")
-local BtnSmallSize = CreateSquareButton("تصغير الحجم ➖")
 
 -- 1. الفلاش باك الانسيابي (Rewind)
 local PositionHistory = {}
@@ -136,21 +153,9 @@ RunService.RenderStepped:Connect(function()
             end
         end
     end
-    
-    for _, obj in pairs(Workspace:GetChildren()) do
-        if obj.Name == "GunDrop" or (obj:IsA("Tool") and obj.Name == "Gun") then
-            local hl = obj:FindFirstChild("bradokz_GunESP")
-            if not hl then
-                hl = Instance.new("Highlight")
-                hl.Name = "bradokz_GunESP"
-                hl.Parent = obj
-            end
-            hl.FillColor = Color3.fromRGB(255, 255, 0)
-        end
-    end
 end)
 
--- 3. أيم بوت
+-- 3. Aimbot
 BtnAimbot.MouseButton1Click:Connect(function()
     local murderer = nil
     for _, p in pairs(Players:GetPlayers()) do
@@ -170,7 +175,7 @@ BtnAimbot.MouseButton1Click:Connect(function()
     end
 end)
 
--- 4. رمي السكينة
+-- 4. قتل
 BtnKnife.MouseButton1Click:Connect(function()
     local target = nil
     for _, p in pairs(Players:GetPlayers()) do
@@ -190,18 +195,7 @@ BtnKnife.MouseButton1Click:Connect(function()
     end
 end)
 
--- 5. القتل العادي
-BtnKill.MouseButton1Click:Connect(function()
-    if LocalPlayer.Character then
-        local knife = LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife")
-        if knife then
-            knife.Parent = LocalPlayer.Character
-            knife:Activate()
-        end
-    end
-end)
-
--- 6. قتل الجميع (لما تكون مردر)
+-- 5. قتل الجميع
 BtnKillAll.MouseButton1Click:Connect(function()
     local knife = LocalPlayer.Character and (LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife"))
     if knife then
@@ -214,27 +208,4 @@ BtnKillAll.MouseButton1Click:Connect(function()
             end
         end
     end
-end)
-
--- 7. تغيير حجم الشخصية (تكبير / تصغير)
-local function ChangeScale(multiplier)
-    local char = LocalPlayer.Character
-    if char and char:FindFirstChild("Humanoid") then
-        local humanoid = char.Humanoid
-        local scaleValues = {"BodyHeightScale", "BodyWidthScale", "BodyDepthScale", "HeadScale"}
-        for _, scaleName in ipairs(scaleValues) do
-            local val = humanoid:FindFirstChild(scaleName)
-            if val then
-                val.Value = val.Value * multiplier
-            end
-        end
-    end
-end
-
-BtnBigSize.MouseButton1Click:Connect(function()
-    ChangeScale(1.5) -- تكبير بنسبة 50%
-end)
-
-BtnSmallSize.MouseButton1Click:Connect(function()
-    ChangeScale(0.7) -- تصغير بنسبة 30%
 end)
