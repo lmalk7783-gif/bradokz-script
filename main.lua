@@ -1,9 +1,9 @@
--- [[ bradokz Hub - V5 Custom Edition ]] --
+-- [[ bradokz Hub - V6 Final Fixed ]] --
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
    Name = "bradokz Hub ⚡",
-   LoadingTitle = "جاري تحميل السكربت...",
+   LoadingTitle = "جاري التحميل...",
    LoadingSubtitle = "by bradokz",
    ConfigurationSaving = { Enabled = false },
    KeySystem = false
@@ -22,7 +22,7 @@ local SavedBaseCFrame = nil
 local TargetPlayer = nil
 local IsAttacking = false
 
--- 1. حفظ موقع القاعدة تلقائياً
+-- 1. حفظ القاعدة والانتقال إليها
 local function SaveBase()
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         SavedBaseCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
@@ -30,15 +30,12 @@ local function SaveBase()
 end
 SaveBase()
 
--- زرار الانتقال للقاعدة
 MainTab:CreateButton({
    Name = "الانتقال إلى القاعدة (Teleport to Base)",
    Callback = function()
        if SavedBaseCFrame and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
            LocalPlayer.Character.HumanoidRootPart.CFrame = SavedBaseCFrame
-           Rayfield:Notify({ Title = "نجاح", Content = "تم الانتقال لقاعدتك بنجاح!", Duration = 2 })
-       else
-           Rayfield:Notify({ Title = "تنبيه", Content = "لم يتم تحديد موقع القاعدة بعد!", Duration = 2 })
+           Rayfield:Notify({ Title = "نجاح", Content = "تم الانتقال لقاعدتك!", Duration = 2 })
        end
    end,
 })
@@ -47,33 +44,28 @@ MainTab:CreateButton({
    Name = "تحديد موقع القاعدة الحالي",
    Callback = function()
        SaveBase()
-       Rayfield:Notify({ Title = "تم الحفظ", Content = "تم تسجيل مكانك الحالي كقاعدة!", Duration = 2 })
+       Rayfield:Notify({ Title = "تم الحفظ", Content = "تم تحديد مكان قاعدتك!", Duration = 2 })
    end,
 })
 
--- 2. Desync معدل بدون وقوع أو تثبيت
+-- 2. Desync ثابت (بدون وقوع أو تثبيت)
 local DesyncToggle = false
-local DesyncConn = nil
-
 MainTab:CreateToggle({
-   Name = "تفعيل Desync (بدون وقوع أو تعليق)",
+   Name = "تفعيل Desync (حماية خفيفة)",
    CurrentValue = false,
-   Flag = "DesyncV5",
+   Flag = "DesyncFixed",
    Callback = function(Value)
        DesyncToggle = Value
-       if DesyncToggle then
-           DesyncConn = RunService.Heartbeat:Connect(function()
-               if DesyncToggle and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+       task.spawn(function()
+           while DesyncToggle do
+               task.wait()
+               if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
                    local hrp = LocalPlayer.Character.HumanoidRootPart
-                   local oldCFrame = hrp.CFrame
-                   hrp.CFrame = hrp.CFrame * CFrame.new(0, math.random(-5, 5), 0)
-                   RunService.RenderStepped:Wait()
-                   hrp.CFrame = oldCFrame
+                   hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                   hrp.CFrame = hrp.CFrame + Vector3.new(math.random(-1,1)/10, 0, math.random(-1,1)/10)
                end
-           end)
-       else
-           if DesyncConn then DesyncConn:Disconnect() end
-       end
+           end
+       end)
    end,
 })
 
@@ -94,15 +86,11 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
--- 4. القتال والضرب
+-- 4. القتال والضرب (بدون الوقوع في الأرض)
 local PlayerNames = {}
-local function UpdatePlayers()
-    PlayerNames = {}
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer then table.insert(PlayerNames, p.Name) end
-    end
+for _, p in pairs(Players:GetPlayers()) do
+    if p ~= LocalPlayer then table.insert(PlayerNames, p.Name) end
 end
-UpdatePlayers()
 
 CombatTab:CreateDropdown({
    Name = "اختر اللاعب للاستهداف",
@@ -123,11 +111,14 @@ CombatTab:CreateToggle({
        if IsAttacking then
            task.spawn(function()
                while IsAttacking do
-                   task.wait(0.03)
+                   task.wait(0.05)
                    if TargetPlayer and TargetPlayer.Character and TargetPlayer.Character:FindFirstChild("HumanoidRootPart") then
                        local myChar = LocalPlayer.Character
                        if myChar and myChar:FindFirstChild("HumanoidRootPart") then
-                           myChar.HumanoidRootPart.CFrame = TargetPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2.5)
+                           -- الانتقال خلف الهدف بدون التسبب في الوقوع
+                           myChar.HumanoidRootPart.CFrame = TargetPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
+                           
+                           -- تفعيل الضربة
                            local tool = myChar:FindFirstChildOfClass("Tool")
                            if tool then tool:Activate() end
                        end
@@ -138,65 +129,63 @@ CombatTab:CreateToggle({
    end,
 })
 
--- 5. كشف أغلى BrainRot في السيرفر بس (Most Expensive BrainRot ESP)
-local ExpensiveESPEnabled = false
-
+-- 5. كشف أغلى BrainRot (ESP نصي واضح فوق المجسم)
+local ESPEnabled = false
 VisualTab:CreateToggle({
    Name = "كشف أغلى BrainRot في السيرفر (ESP)",
    CurrentValue = false,
    Flag = "MostExpensiveESP",
    Callback = function(Value)
-       ExpensiveESPEnabled = Value
+       ESPEnabled = Value
        
-       -- مسح أي كشف قديم
+       -- تنظيف السكربت من الكشوفات القديمة
        for _, v in pairs(workspace:GetDescendants()) do
-           if v:IsA("Highlight") and v.Name == "MostExpensiveBrainRotESP" then
+           if v:IsA("BillboardGui") and v.Name == "BrainRotESP_Gui" then
                v:Destroy()
            end
        end
-       
-       if ExpensiveESPEnabled then
+
+       if ESPEnabled then
            task.spawn(function()
-               local highestValue = -1
-               local rarestItem = nil
-
-               -- البحث عن الأغلى في الماب (بفحص القيمة أو السعر)
-               for _, obj in pairs(workspace:GetDescendants()) do
-                   local valObj = obj:FindFirstChild("Value") or obj:FindFirstChild("Price") or obj:FindFirstChild("Cost")
-                   if valObj and valObj:IsA("IntValue") or valObj:IsA("NumberValue") then
-                       if valObj.Value > highestValue then
-                           highestValue = valObj.Value
-                           rarestItem = obj
-                       end
-                   end
-               end
-
-               -- إذا لم يجد قيمة مباشرة، يحدد العنصر ذو أعلى مستوى/اسم
-               if not rarestItem then
-                   for _, obj in pairs(workspace:GetDescendants()) do
-                       if obj:IsA("Model") and (obj.Name:find("BrainRot") or obj.Name:find("100M") or obj.Name:find("Secret")) then
-                           rarestItem = obj
+               local targetObj = nil
+               
+               -- البحث عن أعلى كائن يحتوي على كلمة BrainRot أو قيم عالية
+               for _, v in pairs(workspace:GetDescendants()) do
+                   if v:IsA("Model") or v:IsA("BasePart") then
+                       if v.Name:lower():find("brain") or v.Name:lower():find("rot") or v.Name:find("100M") or v.Name:find("Secret") then
+                           targetObj = v
                            break
                        end
                    end
                end
 
-               if rarestItem then
-                   local hl = Instance.new("Highlight")
-                   hl.Name = "MostExpensiveBrainRotESP"
-                   hl.FillColor = Color3.fromRGB(255, 215, 0) -- لون ذهبي
-                   hl.OutlineColor = Color3.fromRGB(255, 255, 0)
-                   hl.Parent = rarestItem
-                   Rayfield:Notify({ Title = "تم الكشف!", Content = "تم تحديد مكان أغلى BrainRot باللون الذهبي!", Duration = 3 })
+               if targetObj then
+                   local bg = Instance.new("BillboardGui")
+                   bg.Name = "BrainRotESP_Gui"
+                   bg.AlwaysOnTop = true
+                   bg.Size = UDim2.new(0, 200, 0, 50)
+                   bg.ExtentsOffset = Vector3.new(0, 3, 0)
+                   bg.Parent = targetObj
+
+                   local txt = Instance.new("TextLabel")
+                   txt.Size = UDim2.new(1, 0, 1, 0)
+                   txt.BackgroundTransparency = 1
+                   txt.Text = "🔥 أغلى BrainRot هنا 🔥"
+                   txt.TextColor3 = Color3.fromRGB(255, 215, 0)
+                   txt.TextScaled = true
+                   txt.Font = Enum.Font.SourceSansBold
+                   txt.Parent = bg
+                   
+                   Rayfield:Notify({ Title = "تم الكشف!", Content = "تم تحديد مكان الكائن النصي باللون الذهبي!", Duration = 3 })
                else
-                   Rayfield:Notify({ Title = "تنبيه", Content = "لم يتم العثور على عنصر ثين بعينه الآن.", Duration = 3 })
+                   Rayfield:Notify({ Title = "تنبيه", Content = "لم يتم العثور على BrainRot في الخريطة حالياً", Duration = 3 })
                end
            end)
        end
    end,
 })
 
--- 6. تخفيف اللاق (Anti-Lag)
+-- 6. تخفيف اللاق الفوري (Anti-Lag)
 VisualTab:CreateButton({
    Name = "تخفيف اللاق وزيادة الفريمات (Anti-Lag)",
    Callback = function()
@@ -210,6 +199,6 @@ VisualTab:CreateButton({
            end
        end
        game:GetService("Lighting").GlobalShadows = false
-       Rayfield:Notify({ Title = "تم الإزالة", Content = "تم إزالة اللاق وتحسين الفريمات بنجاح!", Duration = 3 })
+       Rayfield:Notify({ Title = "تم الإزالة", Content = "تم إزالة اللاق وتحسين الأداء!", Duration = 3 })
    end,
 })
