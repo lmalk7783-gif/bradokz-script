@@ -99,7 +99,6 @@ local function GetRole(player)
 end
 
 RunService.RenderStepped:Connect(function()
-    -- كشف اللاعبين بالألوان المطلوبة
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character then
             local role = GetRole(p)
@@ -108,27 +107,26 @@ RunService.RenderStepped:Connect(function()
             hl.Parent = p.Character
             
             if role == "Murderer" then
-                hl.FillColor = Color3.fromRGB(255, 0, 0) -- أحمر (القاتل)
+                hl.FillColor = Color3.fromRGB(255, 0, 0) -- أحمر
             elseif role == "Sheriff" then
-                hl.FillColor = Color3.fromRGB(0, 100, 255) -- أزرق (الشريف)
+                hl.FillColor = Color3.fromRGB(0, 100, 255) -- أزرق
             else
-                hl.FillColor = Color3.fromRGB(0, 255, 0) -- أخضر (البريء)
+                hl.FillColor = Color3.fromRGB(0, 255, 0) -- أخضر
             end
         end
     end
     
-    -- كشف المسدس الساقط باللون الأصفر
     for _, obj in pairs(Workspace:GetDescendants()) do
         if obj.Name == "GunDrop" or (obj:IsA("Tool") and obj.Name == "Gun" and obj.Parent == Workspace) then
             local hl = obj:FindFirstChild("bradokz_GunESP") or Instance.new("Highlight")
             hl.Name = "bradokz_GunESP"
-            hl.FillColor = Color3.fromRGB(255, 255, 0) -- أصفر (المسدس)
+            hl.FillColor = Color3.fromRGB(255, 255, 0) -- أصفر
             hl.Parent = obj
         end
     end
 end)
 
--- 3. أيم بوت الشريف على الموردر
+-- 3. أيم بوت الشريف
 BtnAimbot.MouseButton1Click:Connect(function()
     local murderer = nil
     for _, p in pairs(Players:GetPlayers()) do
@@ -148,7 +146,7 @@ BtnAimbot.MouseButton1Click:Connect(function()
     end
 end)
 
--- 4. رمي السكينة تلقائياً على الشريف
+-- 4. رمي السكينة تلقائياً
 BtnKnife.MouseButton1Click:Connect(function()
     local target = nil
     for _, p in pairs(Players:GetPlayers()) do
