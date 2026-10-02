@@ -1,30 +1,40 @@
--- Script Name: bradokz Hub
--- Created for Delta Executor
+-- bradokz Hub - Custom Script for Brainrot Game
+-- Made for Delta Executor
 
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
-local Window = OrionLib:MakeWindow({Name = "bradokz Hub", HidePremium = false, SaveConfig = false, IntroText = "bradokz"})
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/main/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/main/Addons/InterfaceManager.lua"))()
 
+local Window = Fluent:CreateWindow({
+    Title = "bradokz Hub",
+    SubTitle = "by bradokz",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+local Tabs = {
+    Main = Window:AddTab({ Title = "الرئيسية", Icon = "home" }),
+    Player = Window:AddTab({ Title = "اللاعب والشخصية", Icon = "user" }),
+    Settings = Window:AddTab({ Title = "الأداء والتخفيف", Icon = "settings" })
+}
+
+local Options = Fluent.Options
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
--- Tabs
-local MainTab = Window:MakeTab({Name = "الرئيسية", Icon = "rbxassetid://4483345998"})
-local PlayerTab = Window:MakeTab({Name = "اللاعب والشخصية", Icon = "rbxassetid://4483345998"})
-local PerformanceTab = Window:MakeTab({Name = "الأداء", Icon = "rbxassetid://4483345998"})
+---------------------------------------------------------
+-- 1. Desync
+---------------------------------------------------------
+local DesyncToggle = Tabs.Main:AddToggle("DesyncToggle", {Title = "Desync", Default = false})
 
----------------------------------------------------------
--- 1. Desync Feature
----------------------------------------------------------
 getgenv().DesyncActive = false
-MainTab:AddToggle({
-    Name = "Desync",
-    Default = false,
-    Callback = function(Value)
-        getgenv().DesyncActive = Value
-    end
-})
+DesyncToggle:OnChanged(function()
+    getgenv().DesyncActive = Options.DesyncToggle.Value
+end)
 
 RunService.Heartbeat:Connect(function()
     if getgenv().DesyncActive and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
@@ -37,33 +47,35 @@ RunService.Heartbeat:Connect(function()
 end)
 
 ---------------------------------------------------------
--- 2. Steal Button (سرقة تلقائي)
+-- 2. Steal Button (زر السرقة الأسود)
 ---------------------------------------------------------
-local StealScreenGui = Instance.new("ScreenGui")
-local StealButton = Instance.new("TextButton")
+local StealGui = Instance.new("ScreenGui")
+local StealBtn = Instance.new("TextButton")
 
-StealScreenGui.Name = "StealGui"
-StealScreenGui.Parent = game:GetService("CoreGui")
-StealButton.Name = "StealBtn"
-StealButton.Parent = StealScreenGui
-StealButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-StealButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-StealButton.Size = UDim2.new(0, 120, 0, 50)
-StealButton.Position = UDim2.new(0.8, 0, 0.4, 0)
-StealButton.Text = "Steal"
-StealButton.TextSize = 20
-StealButton.Visible = false
-StealButton.Active = true
-StealButton.Draggable = true
+StealGui.Name = "StealGui_bradokz"
+StealGui.Parent = game:GetService("CoreGui")
 
-MainTab:AddButton({
-    Name = "السرقة تلقائي",
+StealBtn.Name = "StealBtn"
+StealBtn.Parent = StealGui
+StealBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+StealBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+StealBtn.Size = UDim2.new(0, 130, 0, 50)
+StealBtn.Position = UDim2.new(0.8, 0, 0.35, 0)
+StealBtn.Text = "Steal"
+StealBtn.TextSize = 22
+StealBtn.Font = Enum.Font.SourceSansBold
+StealBtn.Visible = false
+StealBtn.Active = true
+StealBtn.Draggable = true
+
+Tabs.Main:AddButton({
+    Title = "السرقة تلقائي",
     Callback = function()
-        StealButton.Visible = true
+        StealBtn.Visible = true
     end
 })
 
-StealButton.MouseButton1Click:Connect(function()
+StealBtn.MouseButton1Click:Connect(function()
     for _, prompt in pairs(workspace:GetDescendants()) do
         if prompt:IsA("ProximityPrompt") then
             fireproximityprompt(prompt)
@@ -72,65 +84,80 @@ StealButton.MouseButton1Click:Connect(function()
 end)
 
 ---------------------------------------------------------
--- 3. Base Return (العودة إلى البيت)
+-- 3. Base Button (زر العودة للبيت الأسود)
 ---------------------------------------------------------
-local BaseScreenGui = Instance.new("ScreenGui")
-local BaseButton = Instance.new("TextButton")
+local BaseGui = Instance.new("ScreenGui")
+local BaseBtn = Instance.new("TextButton")
 
-BaseScreenGui.Name = "BaseGui"
-BaseScreenGui.Parent = game:GetService("CoreGui")
-BaseButton.Name = "BaseBtn"
-BaseButton.Parent = BaseScreenGui
-BaseButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-BaseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-BaseButton.Size = UDim2.new(0, 120, 0, 50)
-BaseButton.Position = UDim2.new(0.8, 0, 0.5, 0)
-BaseButton.Text = "base"
-BaseButton.TextSize = 20
-BaseButton.Visible = false
-BaseButton.Active = true
-BaseButton.Draggable = true
+BaseGui.Name = "BaseGui_bradokz"
+BaseGui.Parent = game:GetService("CoreGui")
 
-MainTab:AddButton({
-    Name = "العودة",
+BaseBtn.Name = "BaseBtn"
+BaseBtn.Parent = BaseGui
+BaseBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+BaseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+BaseBtn.Size = UDim2.new(0, 130, 0, 50)
+BaseBtn.Position = UDim2.new(0.8, 0, 0.48, 0)
+BaseBtn.Text = "base"
+BaseBtn.TextSize = 22
+BaseBtn.Font = Enum.Font.SourceSansBold
+BaseBtn.Visible = false
+BaseBtn.Active = true
+BaseBtn.Draggable = true
+
+Tabs.Main:AddButton({
+    Title = "العودة",
     Callback = function()
-        BaseButton.Visible = true
+        BaseBtn.Visible = true
     end
 })
 
-local SavedBasePosition = nil
+local SavedBasePos = nil
 if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-    SavedBasePosition = LocalPlayer.Character.HumanoidRootPart.CFrame
+    SavedBasePos = LocalPlayer.Character.HumanoidRootPart.CFrame
 end
 
-BaseButton.MouseButton1Click:Connect(function()
-    if SavedBasePosition and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        LocalPlayer.Character.HumanoidRootPart.CFrame = SavedBasePosition
+BaseBtn.MouseButton1Click:Connect(function()
+    if SavedBasePos and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        LocalPlayer.Character.HumanoidRootPart.CFrame = SavedBasePos
     end
 end)
 
 ---------------------------------------------------------
--- 4. Target Player & Bat Attack (استهداف وضرب بالعصاية)
+-- 4. Target Player & Bat Attack
 ---------------------------------------------------------
-local SelectedPlayer = nil
-
-MainTab:AddDropdown({
-    Name = "اختر الشخص في السيرفر",
-    Options = {},
-    Callback = function(Option)
-        SelectedPlayer = Players:FindFirstChild(Option)
+local playerNames = {}
+for _, p in pairs(Players:GetPlayers()) do
+    if p ~= LocalPlayer then
+        table.insert(playerNames, p.Name)
     end
+end
+
+local SelectedPlayerName = nil
+local PlayerDropdown = Tabs.Main:AddDropdown("PlayerDropdown", {
+    Title = "اختر الشخص في السيرفر",
+    Values = playerNames,
+    Multi = false,
+    Default = 1,
 })
 
-MainTab:AddButton({
-    Name = "ضرب الشخص",
+PlayerDropdown:OnChanged(function(Value)
+    SelectedPlayerName = Value
+end)
+
+Tabs.Main:AddButton({
+    Title = "ضرب الشخص",
     Callback = function()
-        if SelectedPlayer and SelectedPlayer.Character and SelectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                LocalPlayer.Character.HumanoidRootPart.CFrame = SelectedPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2)
-                local tool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
-                if tool then
-                    tool:Activate()
+        if SelectedPlayerName then
+            local targetPlayer = Players:FindFirstChild(SelectedPlayerName)
+            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2)
+                    local bat = LocalPlayer.Character:FindFirstChildOfClass("Tool") or LocalPlayer.Backpack:FindFirstChildOfClass("Tool")
+                    if bat then
+                        bat.Parent = LocalPlayer.Character
+                        bat:Activate()
+                    end
                 end
             end
         end
@@ -138,25 +165,25 @@ MainTab:AddButton({
 })
 
 ---------------------------------------------------------
--- 5. Character Size (تكبير وتصغير الحجم)
+-- 5. Size Control
 ---------------------------------------------------------
-PlayerTab:AddButton({
-    Name = "تكبير الحجم",
+Tabs.Player:AddButton({
+    Title = "تكبير الحجم",
     Callback = function()
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
             local hum = LocalPlayer.Character.Humanoid
             if hum:FindFirstChild("HeadScale") then
-                hum.HeadScale.Value = hum.HeadScale.Value * 1.5
-                hum.BodyDepthScale.Value = hum.BodyDepthScale.Value * 1.5
-                hum.BodyWidthScale.Value = hum.BodyWidthScale.Value * 1.5
-                hum.BodyHeightScale.Value = hum.BodyHeightScale.Value * 1.5
+                hum.HeadScale.Value = hum.HeadScale.Value * 1.4
+                hum.BodyDepthScale.Value = hum.BodyDepthScale.Value * 1.4
+                hum.BodyWidthScale.Value = hum.BodyWidthScale.Value * 1.4
+                hum.BodyHeightScale.Value = hum.BodyHeightScale.Value * 1.4
             end
         end
     end
 })
 
-PlayerTab:AddButton({
-    Name = "تصغير الحجم",
+Tabs.Player:AddButton({
+    Title = "تصغير الحجم",
     Callback = function()
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
             local hum = LocalPlayer.Character.Humanoid
@@ -171,29 +198,26 @@ PlayerTab:AddButton({
 })
 
 ---------------------------------------------------------
--- 6. Infinite Jump (القفز اللانهائي)
+-- 6. Infinite Jump Toggle
 ---------------------------------------------------------
-getgenv().InfiniteJumpEnabled = false
+local InfJumpToggle = Tabs.Player:AddToggle("InfJumpToggle", {Title = "القفز اللانهائي", Default = false})
 
-PlayerTab:AddToggle({
-    Name = "القفز اللانهائي",
-    Default = false,
-    Callback = function(Value)
-        getgenv().InfiniteJumpEnabled = Value
-    end
-})
+getgenv().InfJump = false
+InfJumpToggle:OnChanged(function()
+    getgenv().InfJump = Options.InfJumpToggle.Value
+end)
 
 UserInputService.JumpRequest:Connect(function()
-    if getgenv().InfiniteJumpEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+    if getgenv().InfJump and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
         LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
     end
 end)
 
 ---------------------------------------------------------
--- 7. Lag Reduction (تخفيف اللاق)
+-- 7. Lag Reduction
 ---------------------------------------------------------
-PerformanceTab:AddButton({
-    Name = "تخفيف اللاق",
+Tabs.Settings:AddButton({
+    Title = "تخفيف اللاق",
     Callback = function()
         for _, v in pairs(workspace:GetDescendants()) do
             if v:IsA("BasePart") then
@@ -209,4 +233,8 @@ PerformanceTab:AddButton({
     end
 })
 
-OrionLib:Init()
+Fluent:Notify({
+    Title = "bradokz Hub",
+    Content = "تم تشغيل السكربت بنجاح!",
+    Duration = 5
+})
