@@ -1,29 +1,188 @@
--- [[ bradokz Hub - Ultra Light ]] --
+-- [[ bradokz Hub - MM2 Special Edition ]] --
+
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
--- 1. القفز اللانهائي (شغال بدون أي تقطيع)
-UserInputService.JumpRequest:Connect(function()
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+-- إنشاء واجهة bradokz
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "bradokz_GUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "bradokz"
+MainFrame.Size = UDim2.new(0, 210, 0, 320)
+MainFrame.Position = UDim2.new(0.05, 0, 0.25, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+MainFrame.BorderSizePixel = 2
+MainFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+
+-- عنوان الواجهة باسم bradokz
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Text = "bradokz Hub ⚡"
+Title.TextSize = 18
+Title.Font = Enum.Font.SourceSansBold
+Title.BorderSizePixel = 1
+Title.BorderColor3 = Color3.fromRGB(255, 255, 255)
+Title.Parent = MainFrame
+
+local UIList = Instance.new("UIListLayout")
+UIList.Parent = MainFrame
+UIList.SortOrder = Enum.SortOrder.LayoutOrder
+UIList.Padding = UDim.new(0, 4)
+
+local function CreateSquareButton(text)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -10, 0, 36)
+    btn.Position = UDim2.new(0, 5, 0, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Text = text
+    btn.TextSize = 15
+    btn.Font = Enum.Font.SourceSansBold
+    btn.BorderSizePixel = 1
+    btn.BorderColor3 = Color3.fromRGB(120, 120, 120)
+    btn.Parent = MainFrame
+    return btn
+end
+
+-- الأزرار بالمربعات السوداء والخطوط البيضاء
+local BtnFlashback = CreateSquareButton("فلاش باك")
+local BtnAimbot = CreateSquareButton("أيم بوت")
+local BtnKnife = CreateSquareButton("رمي")
+local BtnKill = CreateSquareButton("قتل")
+local BtnTeleportGun = CreateSquareButton("الانتقال إلى القاعدة")
+
+-- 1. نظام الفلاش باك (Flashback)
+local PositionHistory = {}
+RunService.Heartbeat:Connect(function()
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        table.insert(PositionHistory, LocalPlayer.Character.HumanoidRootPart.CFrame)
+        if #PositionHistory > 180 then -- حفظ آخر 3 ثواني
+            table.remove(PositionHistory, 1)
+        end
     end
 end)
 
--- 2. إزالة اللاق وتحسين الفريمات فوراً
-local function FixLag()
-    for _, v in pairs(game:GetDescendants()) do
-        if v:IsA("Part") or v:IsA("MeshPart") or v:IsA("UnionOperation") then
-            v.Material = Enum.Material.SmoothPlastic
-        elseif v:IsA("Decal") or v:IsA("Texture") then
-            v:Destroy()
-        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-            v.Enabled = false
-        end
+BtnFlashback.MouseButton1Click:Connect(function()
+    if #PositionHistory > 0 and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        LocalPlayer.Character.HumanoidRootPart.CFrame = PositionHistory[1]
     end
-    game:GetService("Lighting").GlobalShadows = false
-    print("Anti-Lag Done!")
+end)
+
+-- 2. كشف الأدوار والمسدس (ESP)
+local function GetRole(player)
+    if not player.Character then return "Innocent" end
+    if player.Backpack:FindFirstChild("Knife") or player.Character:FindFirstChild("Knife") then
+        return "Murderer"
+    elseif player.Backpack:FindFirstChild("Gun") or player.Character:FindFirstChild("Gun") then
+        return "Sheriff"
+    end
+    return "Innocent"
 end
 
--- تشغيل إزالة اللاق مرة واحدة بس عشان الموبايل ما يعلقش
-FixLag()
+RunService.RenderStepped:Connect(function()
+    -- كشف اللاعبين بالألوان المطلوبة
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            local role = GetRole(p)
+            local hl = p.Character:FindFirstChild("RoleESP") or Instance.new("Highlight")
+            hl.Name = "RoleESP"
+            hl.Parent = p.Character
+            
+            if role == "Murderer" then
+                hl.FillColor = Color3.fromRGB(255, 0, 0) -- أحمر (القاتل)
+            elseif role == "Sheriff" then
+                hl.FillColor = Color3.fromRGB(0, 100, 255) -- أزرق (الشريف)
+            else
+                hl.FillColor = Color3.fromRGB(0, 255, 0) -- أخضر (البريء)
+            end
+        end
+    end
+    
+    -- كشف المسدس الساقط باللون الأصفر
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        if obj.Name == "GunDrop" or (obj:IsA("Tool") and obj.Name == "Gun" and obj.Parent == Workspace) then
+            local hl = obj:FindFirstChild("GunESP") or Instance.new("Highlight")
+            hl.Name = "GunESP"
+            hl.FillColor = Color3.fromRGB(255, 255, 0) -- أصفر (المسدس)
+            hl.Parent = obj
+        end
+    end
+end)
+
+-- 3. أيم بوت الشريف (Aimbot على القاتل)
+BtnAimbot.MouseButton1Click:Connect(function()
+    local murderer = nil
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and GetRole(p) == "Murderer" and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            murderer = p
+            break
+        end
+    end
+    
+    if murderer and LocalPlayer.Character then
+        local gun = LocalPlayer.Character:FindFirstChild("Gun") or LocalPlayer.Backpack:FindFirstChild("Gun")
+        if gun then
+            gun.Parent = LocalPlayer.Character
+            Workspace.CurrentCamera.CFrame = CFrame.new(Workspace.CurrentCamera.CFrame.Position, murderer.Character.HumanoidRootPart.Position)
+            gun:Activate()
+        end
+    end
+end)
+
+-- 4. رمي السكينة تلقائياً على الشريف
+BtnKnife.MouseButton1Click:Connect(function()
+    local target = nil
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and (GetRole(p) == "Sheriff" or GetRole(p) == "Innocent") and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            target = p
+            break
+        end
+    end
+    
+    if target and LocalPlayer.Character then
+        local knife = LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife")
+        if knife then
+            knife.Parent = LocalPlayer.Character
+            Workspace.CurrentCamera.CFrame = CFrame.new(Workspace.CurrentCamera.CFrame.Position, target.Character.HumanoidRootPart.Position)
+            knife:Activate()
+        end
+    end
+end)
+
+-- 5. القتل بضغطة (Instant Kill)
+BtnKill.MouseButton1Click:Connect(function()
+    if LocalPlayer.Character then
+        local knife = LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife")
+        if knife then
+            knife.Parent = LocalPlayer.Character
+            knife:Activate()
+        end
+    end
+end)
+
+-- 6. الانتقال إلى مكان المسدس (الانتقال إلى القاعدة)
+BtnTeleportGun.MouseButton1Click:Connect(function()
+    local droppedGun = nil
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        if obj.Name == "GunDrop" or (obj:IsA("Tool") and obj.Name == "Gun" and obj.Parent == Workspace) then
+            droppedGun = obj
+            break
+        end
+    end
+    
+    if droppedGun and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local targetCFrame = droppedGun:IsA("BasePart") and droppedGun.CFrame or droppedGun:GetModelCFrame()
+        LocalPlayer.Character.HumanoidRootPart.CFrame = targetCFrame
+    end
+end)
