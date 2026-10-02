@@ -1,4 +1,4 @@
--- [[ bradokz Hub - MM2 Special Edition ]] --
+-- [[ bradokz Hub - Direct Code ]] --
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -10,7 +10,15 @@ local LocalPlayer = Players.LocalPlayer
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "bradokz_GUI"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+-- التأكد من إضافة الواجهة للـ PlayerGui
+local success, err = pcall(function()
+    ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui", 5)
+end)
+
+if not success or not ScreenGui.Parent then
+    ScreenGui.Parent = game:GetService("CoreGui")
+end
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "bradokz"
@@ -120,7 +128,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- 3. أيم بوت الشريف (Aimbot على القاتل)
+-- 3. أيم بوت الشريف
 BtnAimbot.MouseButton1Click:Connect(function()
     local murderer = nil
     for _, p in pairs(Players:GetPlayers()) do
@@ -160,7 +168,7 @@ BtnKnife.MouseButton1Click:Connect(function()
     end
 end)
 
--- 5. القتل بضغطة (Instant Kill)
+-- 5. القتل بضغطة واحدة
 BtnKill.MouseButton1Click:Connect(function()
     if LocalPlayer.Character then
         local knife = LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife")
@@ -171,7 +179,7 @@ BtnKill.MouseButton1Click:Connect(function()
     end
 end)
 
--- 6. الانتقال إلى مكان المسدس (الانتقال إلى القاعدة)
+-- 6. الانتقال إلى مكان المسدس
 BtnTeleportGun.MouseButton1Click:Connect(function()
     local droppedGun = nil
     for _, obj in pairs(Workspace:GetDescendants()) do
