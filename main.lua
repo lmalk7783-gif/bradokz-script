@@ -19,8 +19,8 @@ end
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "bradokzMain"
-MainFrame.Size = UDim2.new(0, 210, 0, 310)
-MainFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
+MainFrame.Size = UDim2.new(0, 210, 0, 390)
+MainFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.BorderSizePixel = 2
 MainFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
@@ -65,6 +65,8 @@ local BtnAimbot = CreateSquareButton("أيم بوت")
 local BtnKnife = CreateSquareButton("رمي")
 local BtnKill = CreateSquareButton("قتل")
 local BtnKillAll = CreateSquareButton("قتل الجميع (للمردر)")
+local BtnBigSize = CreateSquareButton("تكبير الحجم ➕")
+local BtnSmallSize = CreateSquareButton("تصغير الحجم ➖")
 
 -- 1. الفلاش باك الانسيابي (Rewind)
 local PositionHistory = {}
@@ -212,4 +214,27 @@ BtnKillAll.MouseButton1Click:Connect(function()
             end
         end
     end
+end)
+
+-- 7. تغيير حجم الشخصية (تكبير / تصغير)
+local function ChangeScale(multiplier)
+    local char = LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        local humanoid = char.Humanoid
+        local scaleValues = {"BodyHeightScale", "BodyWidthScale", "BodyDepthScale", "HeadScale"}
+        for _, scaleName in ipairs(scaleValues) do
+            local val = humanoid:FindFirstChild(scaleName)
+            if val then
+                val.Value = val.Value * multiplier
+            end
+        end
+    end
+end
+
+BtnBigSize.MouseButton1Click:Connect(function()
+    ChangeScale(1.5) -- تكبير بنسبة 50%
+end)
+
+BtnSmallSize.MouseButton1Click:Connect(function()
+    ChangeScale(0.7) -- تصغير بنسبة 30%
 end)
