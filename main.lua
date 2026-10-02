@@ -1,4 +1,4 @@
--- [[ bradokz Hub - Direct Code ]] --
+-- [[ bradokz MM2 Script ]] --
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -8,10 +8,9 @@ local LocalPlayer = Players.LocalPlayer
 
 -- إنشاء واجهة bradokz
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "bradokz_GUI"
+ScreenGui.Name = "bradokz"
 ScreenGui.ResetOnSpawn = false
 
--- التأكد من إضافة الواجهة للـ PlayerGui
 local success, err = pcall(function()
     ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui", 5)
 end)
@@ -33,6 +32,7 @@ MainFrame.Parent = ScreenGui
 
 -- عنوان الواجهة باسم bradokz
 local Title = Instance.new("TextLabel")
+Title.Name = "bradokzTitle"
 Title.Size = UDim2.new(1, 0, 0, 35)
 Title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -103,8 +103,8 @@ RunService.RenderStepped:Connect(function()
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character then
             local role = GetRole(p)
-            local hl = p.Character:FindFirstChild("RoleESP") or Instance.new("Highlight")
-            hl.Name = "RoleESP"
+            local hl = p.Character:FindFirstChild("bradokz_ESP") or Instance.new("Highlight")
+            hl.Name = "bradokz_ESP"
             hl.Parent = p.Character
             
             if role == "Murderer" then
@@ -120,15 +120,15 @@ RunService.RenderStepped:Connect(function()
     -- كشف المسدس الساقط باللون الأصفر
     for _, obj in pairs(Workspace:GetDescendants()) do
         if obj.Name == "GunDrop" or (obj:IsA("Tool") and obj.Name == "Gun" and obj.Parent == Workspace) then
-            local hl = obj:FindFirstChild("GunESP") or Instance.new("Highlight")
-            hl.Name = "GunESP"
+            local hl = obj:FindFirstChild("bradokz_GunESP") or Instance.new("Highlight")
+            hl.Name = "bradokz_GunESP"
             hl.FillColor = Color3.fromRGB(255, 255, 0) -- أصفر (المسدس)
             hl.Parent = obj
         end
     end
 end)
 
--- 3. أيم بوت الشريف
+-- 3. أيم بوت الشريف على الموردر
 BtnAimbot.MouseButton1Click:Connect(function()
     local murderer = nil
     for _, p in pairs(Players:GetPlayers()) do
@@ -168,7 +168,7 @@ BtnKnife.MouseButton1Click:Connect(function()
     end
 end)
 
--- 5. القتل بضغطة واحدة
+-- 5. القتل بضغطة
 BtnKill.MouseButton1Click:Connect(function()
     if LocalPlayer.Character then
         local knife = LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife")
