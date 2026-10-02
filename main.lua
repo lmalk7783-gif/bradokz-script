@@ -1,11 +1,11 @@
--- [[ bradokz Hub - MM2 Ultra Fast ]] --
+-- [[ bradokz Hub - MM2 Direct Delta ]] --
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
--- إنشاء الواجهة الرسمية باسم bradokz
+-- إنشاء واجهة bradokz
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "bradokz"
 ScreenGui.ResetOnSpawn = false
@@ -18,7 +18,7 @@ if not success or not ScreenGui.Parent then
 end
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
+MainFrame.Name = "bradokzMain"
 MainFrame.Size = UDim2.new(0, 210, 0, 310)
 MainFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
@@ -59,13 +59,14 @@ local function CreateSquareButton(text)
     return btn
 end
 
+-- الأزرار
 local BtnFlashback = CreateSquareButton("فلاش باك")
 local BtnAimbot = CreateSquareButton("أيم بوت")
 local BtnKnife = CreateSquareButton("رمي")
 local BtnKill = CreateSquareButton("قتل")
 local BtnTeleportGun = CreateSquareButton("الانتقال إلى القاعدة")
 
--- 1️⃣ ميزة الفلاش باك (Flashback)
+-- 1. الفلاش باك
 local PositionHistory = {}
 RunService.Heartbeat:Connect(function()
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
@@ -82,7 +83,7 @@ BtnFlashback.MouseButton1Click:Connect(function()
     end
 end)
 
--- 2️⃣ كشف الأدوار والمسدس (ESP)
+-- 2. كشف الأدوار والمسدس
 local function GetRole(player)
     if not player or not player.Character then return "Innocent" end
     if player.Backpack:FindFirstChild("Knife") or player.Character:FindFirstChild("Knife") then
@@ -105,16 +106,15 @@ RunService.RenderStepped:Connect(function()
             end
             
             if role == "Murderer" then
-                hl.FillColor = Color3.fromRGB(255, 0, 0) -- القاتل (أحمر)
+                hl.FillColor = Color3.fromRGB(255, 0, 0)
             elseif role == "Sheriff" then
-                hl.FillColor = Color3.fromRGB(0, 100, 255) -- الشريف (أزرق)
+                hl.FillColor = Color3.fromRGB(0, 100, 255)
             else
-                hl.FillColor = Color3.fromRGB(0, 255, 0) -- البريء (أخضر)
+                hl.FillColor = Color3.fromRGB(0, 255, 0)
             end
         end
     end
     
-    -- كشف المسدس الساقط
     for _, obj in pairs(Workspace:GetChildren()) do
         if obj.Name == "GunDrop" or (obj:IsA("Tool") and obj.Name == "Gun") then
             local hl = obj:FindFirstChild("bradokz_GunESP")
@@ -123,12 +123,12 @@ RunService.RenderStepped:Connect(function()
                 hl.Name = "bradokz_GunESP"
                 hl.Parent = obj
             end
-            hl.FillColor = Color3.fromRGB(255, 255, 0) -- المسدس (أصفر)
+            hl.FillColor = Color3.fromRGB(255, 255, 0)
         end
     end
 end)
 
--- 3️⃣ أيم بوت الشريف على القاتل
+-- 3. أيم بوت
 BtnAimbot.MouseButton1Click:Connect(function()
     local murderer = nil
     for _, p in pairs(Players:GetPlayers()) do
@@ -148,7 +148,7 @@ BtnAimbot.MouseButton1Click:Connect(function()
     end
 end)
 
--- 4️⃣ رمي السكينة تلقائياً
+-- 4. رمي السكينة
 BtnKnife.MouseButton1Click:Connect(function()
     local target = nil
     for _, p in pairs(Players:GetPlayers()) do
@@ -168,7 +168,7 @@ BtnKnife.MouseButton1Click:Connect(function()
     end
 end)
 
--- 5️⃣ القتل بضغطة
+-- 5. القتل
 BtnKill.MouseButton1Click:Connect(function()
     if LocalPlayer.Character then
         local knife = LocalPlayer.Character:FindFirstChild("Knife") or LocalPlayer.Backpack:FindFirstChild("Knife")
@@ -179,7 +179,7 @@ BtnKill.MouseButton1Click:Connect(function()
     end
 end)
 
--- 6️⃣ الانتقال لمكان المسدس (الانتقال إلى القاعدة)
+-- 6. الانتقال للمسدس
 BtnTeleportGun.MouseButton1Click:Connect(function()
     local droppedGun = nil
     for _, obj in pairs(Workspace:GetChildren()) do
